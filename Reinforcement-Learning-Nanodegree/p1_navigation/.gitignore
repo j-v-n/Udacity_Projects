@@ -1,0 +1,6 @@
+*.pth
+Navigation_Pixels.ipynb
+Banana_Linux
+Agent
+.ipynb_checkpoints
+*.log
