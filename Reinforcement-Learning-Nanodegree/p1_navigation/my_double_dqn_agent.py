@@ -1,9 +1,9 @@
 import numpy as np
 import random
 from collections import deque, namedtuple
-
+import gym
 from my_model import DQN
-
+import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -13,7 +13,7 @@ REPLAY_SIZE = int(1e5)
 GAMMA = 0.99
 TAU = 0.005
 LR = 5e-4
-UPDATE_EVERY = 4
+UPDATE_EVERY = 6
 
 device = torch.device("cuda:0")
 
@@ -50,7 +50,12 @@ class DQNAgent:
         states, actions, rewards, next_states, dones = experiences
 
         with torch.no_grad():
-            Q_next = self.target_net(next_states).detach().max(1)[0].unsqueeze(1)
+            next_state_acts = self.local_net(next_states)  # .max(1)[1].unsqueeze(1)
+            next_state_acts_max = next_state_acts.max(1)
+            next_state_acts_max1 = next_state_acts_max[1]
+            next_state_acts_uns = next_state_acts_max1.unsqueeze(1)
+            Q_next = self.target_net(next_states).gather(1, next_state_acts_uns)
+            # Q_next = self.target_net(next_states).detach().max(1)[0].unsqueeze(1)
             Q_targets = rewards + gamma * Q_next * (1 - dones)
 
         Q_local = self.local_net(states).gather(1, actions)
@@ -152,3 +157,4 @@ class ReplayBuffer:
 
     def __len__(self):
         return len(self.memory)
+
