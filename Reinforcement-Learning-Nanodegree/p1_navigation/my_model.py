@@ -19,7 +19,7 @@ class DQN(nn.Module):
 
     def __init__(self, state_size, action_size, seed):
         super(DQN, self).__init__()
-
+        # defining the fully connected layers
         self.fc = nn.Sequential(
             nn.Linear(state_size, 512),
             nn.ReLU(),
@@ -33,4 +33,5 @@ class DQN(nn.Module):
         )
 
     def forward(self, state):
+        # defining the forward pass function
         return self.fc(state)
