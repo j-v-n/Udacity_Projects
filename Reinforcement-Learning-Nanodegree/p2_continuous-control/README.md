@@ -46,6 +46,6 @@ Below is a recording of a smart agent trained with the DDPG algorithm!
 ## TO-DO
 
 - [x] DDPG_Play
-- [ ] DD4PG Implementation
+- [ ] A2C Implementation
 - [ ] Report
 - [ ] Update Final ReadMe
