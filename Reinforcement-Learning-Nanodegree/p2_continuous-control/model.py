@@ -102,6 +102,8 @@ class A2CNetwork(nn.Module):
         self.base = nn.Sequential(
             nn.Linear(state_size,hid_size),
             nn.ReLU(),
+            nn.Linear(hid_size,hid_size),
+            nn.ReLU()
         )
 
         # estimate average

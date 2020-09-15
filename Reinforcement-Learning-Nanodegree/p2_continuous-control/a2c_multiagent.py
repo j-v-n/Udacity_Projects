@@ -12,8 +12,8 @@ import torch.optim as optim
 
 
 GAMMA = 0.99
-REWARD_STEPS = 2
-BATCH_SIZE = 32
+# REWARD_STEPS = 2
+# BATCH_SIZE = 512
 LEARNING_RATE = 5e-5
 ENTROPY_BETA = 1e-4
 
@@ -59,7 +59,7 @@ class Agent():
         self.net.train()
         return np.clip(action, -1, 1)
 
-    def play_n_steps(self,env,brain_name,init_states):
+    def play_n_steps(self,env,brain_name,init_states,episode_end):
         ''' Using a model, collect trajectories over n steps
             Source for code - https://github.com/TomLin/RLND-project/blob/master/p2-continuous-control/a2cModel.py
             This code has been modified to fit my model
@@ -138,7 +138,7 @@ class Agent():
         if dones.any():
             env_info = env.reset(train_mode=True)[brain_name]
             init_states = env_info.vector_observations
-
+            episode_end=True
         
         else:
             init_states = next_states.cpu().data.numpy() 
@@ -147,7 +147,7 @@ class Agent():
         actions_t = np.stack(actions_t)
 
 
-        return states_t, actions_t, final_rewards, init_states, accu_rewards
+        return states_t, actions_t, final_rewards, init_states, accu_rewards, episode_end
 
 
     def learn(self, states_t, actions_t, final_rewards):
@@ -172,8 +172,9 @@ class Agent():
     
     
         final_rewards_t = torch.from_numpy(final_rewards.copy()).float().to(device)
-        final_rewards_t = final_rewards_t.view(self.n_agents*self.n_steps)
-    
+        
+        final_rewards_t = final_rewards_t.view(final_rewards_t.shape[0]*final_rewards_t.shape[1])
+        
         loss_value_v = F.mse_loss(value_v.squeeze(-1),final_rewards_t)
     
         adv_v =final_rewards_t.unsqueeze(dim=-1)-value_v.detach()
@@ -187,6 +188,8 @@ class Agent():
         entropy_loss_v = ENTROPY_BETA * ent_v.mean()
     
         loss_v = loss_policy_v + entropy_loss_v + loss_value_v
+
+        loss_v = loss_policy_v+loss_value_v
     
         loss_v.backward()
         self.net_optimizer.step()
