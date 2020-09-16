@@ -37,15 +37,15 @@ Below is a recording of a smart agent trained with the DDPG algorithm!
 
 ### Notebooks and Scripts
 
-- model -> DDPG neural network class
+- model -> Contains neural networks for DDPG and A2C
 - ddpg_multiagent -> DDPG Agent class
+- a2c_multiagent -> A2C Agent class
 - Continuous Control_Using DDPG.ipynb -> Training notebook for DDPG Solution
+- Continuous Control_Using DDPG.ipynb -> Training notebook for A2C Solution
 - DDPG_Play.ipynb -> Notebook to see smart agent trained using DDPG in action
+- A2C_Play.ipynb -> Notebook to see smart agent trained using A2C in action
+- checkpoint_actor.pth -> Solved actor weights from DDPG solution
+- checkpoint_critic.pth -> Solved critic weights from DDPG solution
+- a2c_checkpoint.pth -> Solved network weights from A2C solution
+- Report.pdf -> Final report
 
-
-## TO-DO
-
-- [x] DDPG_Play
-- [ ] A2C Implementation
-- [ ] Report
-- [ ] Update Final ReadMe
