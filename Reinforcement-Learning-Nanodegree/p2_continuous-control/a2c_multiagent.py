@@ -12,8 +12,6 @@ import torch.optim as optim
 
 
 GAMMA = 0.99
-# REWARD_STEPS = 2
-# BATCH_SIZE = 512
 LEARNING_RATE = 5e-5
 ENTROPY_BETA = 1e-4
 
@@ -48,8 +46,7 @@ class Agent():
     
     def act(self, state):
         """Returns actions for given state as per current policy."""
-        # state = torch.from_numpy(np.expand_dims(state,0)).float().to(device)
-        # state = torch.from_numpy(state).float().to(device)
+
         self.net.eval()
         with torch.no_grad():
             mu_v, var_v, _ = self.net(state)
@@ -69,14 +66,15 @@ class Agent():
                 env: Unity environment
                 brain_name: Unity environment brain
                 init_states: Initial states
-                n_steps: Number of steps
+                episode_end: Flag to specify end of episode
 
             Returns:
-                states_t : List of states
-                actions_t : List of actions
-                rewards_t : List of rewards
-                dones_t : List of done flags
-                init_states : New initial states
+                states_t : Numpy array of states
+                actions_t : Numpy array of actions
+                final_rewards_t : Numpy array of final discounted rewards
+                init_states: Array of initial states for the next time step
+                accu_rewards: Array of rewards obtained by each agent after a time step 
+                episode_end: Flag to specify end of episode
 
         '''
         states_t = []
@@ -96,9 +94,7 @@ class Agent():
                 
 
             self.net.train()
-            
-            
-            # env_info = env.step(actions.cpu().data.numpy())[brain_name]
+
             env_info = env.step(actions)[brain_name]
             next_states = env_info.vector_observations
             rewards = env_info.rewards

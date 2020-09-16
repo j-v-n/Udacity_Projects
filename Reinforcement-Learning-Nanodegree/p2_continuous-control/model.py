@@ -85,7 +85,7 @@ class Critic(nn.Module):
 
 class A2CNetwork(nn.Module):
     """
-    Creates A2C Network for Continuous Action Space
+    Creates A2C Network for Continuous Action Spaces
 
     Code developed from Maxim Lapan's Deep Reinforcement Learning Hands-on Chapter 17
     """
