@@ -20,6 +20,10 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def calc_logprob(mu_v, var_v, actions_v):
+    """
+    Function to calculate log probability of actions - Maxim Lapan's book
+    Deep Reinforcement Learning Hands-on, Chapter 17
+    """
     p1 = - ((mu_v - actions_v) ** 2) / (2*var_v.clamp(min=1e-3))
     p2 = - torch.log(torch.sqrt(2 * math.pi * var_v))
     return p1 + p2
@@ -30,14 +34,13 @@ class Agent():
 
 
 
-    def __init__(self, state_size, action_size, random_seed,n_agents=20,n_steps=4):
+    def __init__(self, state_size, action_size, random_seed,n_steps=4):
 
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
-        self.n_agents = n_agents
         self.n_steps = n_steps
-        # Actor Network (w/ Target Network)
+        
         self.net = A2CNetwork(state_size, action_size, random_seed).to(device)
         self.net_optimizer = optim.Adam(self.net.parameters(), lr=LEARNING_RATE)
 
@@ -49,17 +52,22 @@ class Agent():
 
         self.net.eval()
         with torch.no_grad():
+
+            """
+            Since the action space is continuous, the actor head of the A2C network returns mean and variance for action values.
+
+            The action is sampled from a Gaussian distribution defined by the predicted mean and variance
+            """
             mu_v, var_v, _ = self.net(state)
             mu = mu_v.data.cpu().numpy()
             sigma = torch.sqrt(var_v).data.cpu().numpy()
             action = np.random.normal(mu,sigma)
+
         self.net.train()
         return np.clip(action, -1, 1)
 
     def play_n_steps(self,env,brain_name,init_states,episode_end):
         ''' Using a model, collect trajectories over n steps
-            Source for code - https://github.com/TomLin/RLND-project/blob/master/p2-continuous-control/a2cModel.py
-            This code has been modified to fit my model
 
             Params:
                 model : A2C model 
@@ -81,7 +89,7 @@ class Agent():
         actions_t = []
         rewards_t = []
         
-        accu_rewards = np.zeros(init_states.shape[0])
+        rewards_sum = np.zeros(init_states.shape[0])
         t=0
         states= init_states
 
@@ -92,7 +100,6 @@ class Agent():
                 states = torch.from_numpy(states).float().to(device)
                 actions = self.act(states) 
                 
-
             self.net.train()
 
             env_info = env.step(actions)[brain_name]
@@ -107,7 +114,7 @@ class Agent():
             rewards_t.append(rewards)
             
             states = next_states
-            accu_rewards+= rewards
+            rewards_sum+= rewards
 
             if dones.any() or t>=self.n_steps:
                 self.net.eval()
@@ -143,7 +150,7 @@ class Agent():
         actions_t = np.stack(actions_t)
 
 
-        return states_t, actions_t, final_rewards, init_states, accu_rewards, episode_end
+        return states_t, actions_t, final_rewards, init_states, rewards_sum, episode_end
 
 
     def learn(self, states_t, actions_t, final_rewards):
